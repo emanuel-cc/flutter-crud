@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:formvalidation/src/preferencias_usuario/preferencias_usuario.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:mime_type/mime_type.dart';
@@ -11,10 +12,12 @@ import 'package:formvalidation/src/models/producto_model.dart';
 
 
 class ProductosProvider{
+
   final String _url = 'https://flutter-varios-4045d.firebaseio.com';
+  final prefs = new PreferenciasUsuario();
 
  Future<bool> crearProducto(ProductoModel producto)async{
-   final url = '$_url/productos.json';
+   final url = '$_url/productos.json?auth=${prefs.token}';
 
    final resp = await http.post(url,body: productoModelToJson(producto));
 
@@ -25,7 +28,7 @@ class ProductosProvider{
   }
 
    Future<bool> editarProducto(ProductoModel producto)async{
-   final url = '$_url/productos/${producto.id}.json';
+   final url = '$_url/productos/${producto.id}.json?auth=${prefs.token}';
 
    final resp = await http.put(url,body: productoModelToJson(producto));
 
@@ -36,7 +39,7 @@ class ProductosProvider{
   }
 
   Future<List<ProductoModel>> cargarProductos()async{
-    final url = '$_url/productos.json';
+    final url = '$_url/productos.json?auth=${prefs.token}';
 
     final resp = await http.get(url);
     final Map<String,dynamic> decodedData = json.decode(resp.body);
@@ -55,7 +58,7 @@ class ProductosProvider{
   }
 
   Future<int> borrarProducto(String id)async{
-    final url = '$_url/productos/$id.json';
+    final url = '$_url/productos/$id.json?auth=${prefs.token}';
     final resp = await http.delete(url);
 
     print(json.decode(resp.body));
@@ -80,7 +83,21 @@ class ProductosProvider{
       contentType: MediaType(mimeType[0],mimeType[1])
       );
 
-    //Se puede adjun
+    //Se puede adjuntar varios archivos, pero se va a adjuntar solo uno
     imageUploadRequest.files.add(file);
+
+    final streamResponse = await imageUploadRequest.send();
+    final resp = await http.Response.fromStream(streamResponse);
+
+    if(resp.statusCode != 200 && resp.statusCode != 201){
+      print('Algo salió mal');
+      print(resp.body);
+      return null;
+    }
+
+    //Extraer el url
+    final respData = json.decode(resp.body);
+    print(respData);
+    return respData['secure_url'];
   }
 }

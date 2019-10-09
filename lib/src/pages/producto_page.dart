@@ -129,7 +129,7 @@ class _ProductoPageState extends State<ProductoPage> {
 
   }
 
-  void _submit(){
+  void _submit()async{
     //Sirve para validar el formulario
     if(!formKey.currentState.validate()){
       return;
@@ -145,6 +145,10 @@ class _ProductoPageState extends State<ProductoPage> {
    setState(() {
      _guardando = true;
    });
+
+   if(foto!=null){
+    producto.fotoUrl = await productoProvider.subirImagen(foto);
+   }
    /* print(producto.titulo);
     print(producto.valor);
     print(producto.disponible);*/
@@ -174,7 +178,12 @@ class _ProductoPageState extends State<ProductoPage> {
   Widget _mostrarFoto(){
     if(producto.fotoUrl != null){
       //tengo que hacer esto
-      return Container();
+      return FadeInImage(
+        image: NetworkImage(producto.fotoUrl),
+        placeholder: AssetImage('assets/jar-loading.gif'),
+        height: 300.0,
+        fit: BoxFit.contain,
+      );
     }else{
       return Image(
         //Si hay foto, que me traiga el path, sino, que me muestre la imagen
@@ -199,7 +208,7 @@ class _ProductoPageState extends State<ProductoPage> {
 
     if(foto != null){
       //limpieza
-
+      producto.fotoUrl = null;
     }
     setState(() {});
   }
