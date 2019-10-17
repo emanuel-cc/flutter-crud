@@ -170,7 +170,7 @@ class _ProductoPageState extends State<ProductoPage> {
   void mostrarSnackBar(String mensaje){
     final snackBar = SnackBar(
       content: Text(mensaje),
-      duration: Duration(milliseconds: 1500),
+      duration: Duration(milliseconds: 2500),
     );
     scaffoldKey.currentState.showSnackBar(snackBar);
   }
